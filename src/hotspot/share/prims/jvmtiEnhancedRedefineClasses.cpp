@@ -39,6 +39,7 @@
 #include "oops/fieldStreams.hpp"
 #include "oops/klassVtable.hpp"
 #include "oops/oop.inline.hpp"
+#include "oops/constantPool.inline.hpp"
 #include "prims/jvmtiImpl.hpp"
 #include "prims/jvmtiClassFileReconstituter.hpp"
 #include "prims/jvmtiEnhancedRedefineClasses.hpp"
@@ -627,10 +628,10 @@ void VM_EnhancedRedefineClasses::doit_epilogue() {
     jlong all_time = _timer_vm_op_prologue.milliseconds() + doit_time;
 
     log_info(redefine, class, timer)
-      ("vm_op: all=" UINT64_FORMAT "  prologue=" UINT64_FORMAT "  doit=" UINT64_FORMAT,
+      ("vm_op: all=" JLONG_FORMAT "  prologue=" JLONG_FORMAT "  doit=" JLONG_FORMAT,
        all_time, _timer_vm_op_prologue.milliseconds(), doit_time);
     log_info(redefine, class, timer)
-      ("redefine_single_class: phase1=" UINT64_FORMAT "  phase2=" UINT64_FORMAT,
+      ("redefine_single_class: phase1=" JLONG_FORMAT "  phase2=" JLONG_FORMAT,
        _timer_rsc_phase1.milliseconds(), _timer_rsc_phase2.milliseconds());
   }
 }
