@@ -654,15 +654,15 @@ bool Reflection::verify_member_access(const Klass* current_class,
                                       const Klass* resolved_class,
                                       const Klass* member_class,
                                       AccessFlags access,
+                                      bool classloader_only,
+                                      bool protected_restriction,
+                                      TRAPS) {
 
   // (DCEVM) Decide accessibility based on active version
   if (current_class != NULL) {
     current_class = current_class->active_version();
   }
 
-                                      bool classloader_only,
-                                      bool protected_restriction,
-                                      TRAPS) {
   // Verify that current_class can access a member of member_class, where that
   // field's access bits are "access".  We assume that we've already verified
   // that current_class can access member_class.
