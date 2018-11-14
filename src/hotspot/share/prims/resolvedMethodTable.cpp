@@ -251,7 +251,7 @@ void ResolvedMethodTable::adjust_method_entries(bool * trace_name_printed) {
     for (int i = 0; i < oops_to_add->length(); i++) {
         oop mem_name = oops_to_add->at(i);
         Method* method = (Method*)java_lang_invoke_ResolvedMethodName::vmtarget(mem_name);
-        _the_table->basic_add(method, mem_name);
+        _the_table->basic_add(method, Handle(Thread::current(), mem_name));
     }
   }
 }

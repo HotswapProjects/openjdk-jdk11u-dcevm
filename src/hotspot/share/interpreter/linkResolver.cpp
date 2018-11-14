@@ -300,7 +300,7 @@ void LinkResolver::check_klass_accessability(Klass* ref_klass, Klass* sel_klass,
     }
   }
   Reflection::VerifyClassAccessResults vca_result =
-    Reflection::verify_class_access(ref_klass->newest_version(), InstanceKlass::cast(sel_klass->newest_version()), true);
+    Reflection::verify_class_access(ref_klass->newest_version(), InstanceKlass::cast(base_klass->newest_version()), true);
   if (vca_result != Reflection::ACCESS_OK) {
     ResourceMark rm(THREAD);
     char* msg = Reflection::verify_class_access_msg(ref_klass,
