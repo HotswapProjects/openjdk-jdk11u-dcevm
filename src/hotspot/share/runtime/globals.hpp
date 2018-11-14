@@ -2653,7 +2653,14 @@ define_pd_global(uint64_t,MaxRAM,                    1ULL*G);
           "Start flight recording with options"))                           \
                                                                             \
   experimental(bool, UseFastUnorderedTimeStamps, false,                     \
-          "Use platform unstable time where supported for timestamps only")
+          "Use platform unstable time where supported for timestamps only") \
+                                                                            \
+  product(bool, AllowEnhancedClassRedefinition, true,                       \
+             "Allow enhanced class redefinition beyond swapping method "    \
+             "bodies")                                                      \
+                                                                            \
+  product(bool, DisableHotswapAgent, false,                                 \
+             "Disable integrated Hotswap Agent (HotswapVM only)")
 
 #define VM_FLAGS(develop,                                                   \
                  develop_pd,                                                \

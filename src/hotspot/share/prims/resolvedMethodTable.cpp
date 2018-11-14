@@ -198,6 +198,8 @@ void ResolvedMethodTable::print() {
 void ResolvedMethodTable::adjust_method_entries(bool * trace_name_printed) {
   assert(SafepointSynchronize::is_at_safepoint(), "only called at safepoint");
   // For each entry in RMT, change to new method
+  GrowableArray<oop>* oops_to_add = new GrowableArray<oop>();
+
   for (int i = 0; i < _the_table->table_size(); ++i) {
     for (ResolvedMethodEntry* entry = _the_table->bucket(i);
          entry != NULL;
@@ -218,13 +220,23 @@ void ResolvedMethodTable::adjust_method_entries(bool * trace_name_printed) {
           continue;
         }
 
-        InstanceKlass* holder = old_method->method_holder();
-        Method* new_method = holder->method_with_idnum(old_method->orig_method_idnum());
-        assert(holder == new_method->method_holder(), "call after swapping redefined guts");
-        assert(new_method != NULL, "method_with_idnum() should not be NULL");
-        assert(old_method != new_method, "sanity check");
+        InstanceKlass* newer_klass = InstanceKlass::cast(old_method->method_holder()->new_version());
+        Method* newer_method = newer_klass->method_with_idnum(old_method->orig_method_idnum());
 
-        java_lang_invoke_ResolvedMethodName::set_vmtarget(mem_name, new_method);
+        assert(newer_klass == newer_method->method_holder(), "call after swapping redefined guts");
+        assert(newer_method != NULL, "method_with_idnum() should not be NULL");
+        assert(old_method != newer_method, "sanity check");
+
+        if (_the_table->lookup(newer_method) != NULL) {
+          // old method was already adjusted if new method exists in _the_table
+            continue;
+        }
+
+        java_lang_invoke_ResolvedMethodName::set_vmtarget(mem_name, newer_method);
+        java_lang_invoke_ResolvedMethodName::set_vmholder_offset(mem_name, newer_method);
+
+        newer_klass->set_has_resolved_methods();
+        oops_to_add->append(mem_name);
 
         ResourceMark rm;
         if (!(*trace_name_printed)) {
@@ -233,8 +245,13 @@ void ResolvedMethodTable::adjust_method_entries(bool * trace_name_printed) {
         }
         log_debug(redefine, class, update, constantpool)
           ("ResolvedMethod method update: %s(%s)",
-           new_method->name()->as_C_string(), new_method->signature()->as_C_string());
+           newer_method->name()->as_C_string(), newer_method->signature()->as_C_string());
       }
+    }
+    for (int i = 0; i < oops_to_add->length(); i++) {
+        oop mem_name = oops_to_add->at(i);
+        Method* method = (Method*)java_lang_invoke_ResolvedMethodName::vmtarget(mem_name);
+        _the_table->basic_add(method, mem_name);
     }
   }
 }
