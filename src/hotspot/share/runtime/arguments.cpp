@@ -1616,44 +1616,6 @@ void set_object_alignment() {
   }
 }
 
-void Arguments::setup_hotswap_agent() {
-
-  char ext_path_str[JVM_MAXPATHLEN];
-
-  os::jvm_path(ext_path_str, sizeof(ext_path_str));
-  for (int i = 0; i < 3; i++) {
-    char *end = strrchr(ext_path_str, *os::file_separator());
-    if (end != NULL) *end = '\0';
-  }
-  size_t ext_path_length = strlen(ext_path_str);
-  if (ext_path_length >= 3) {
-    if (strcmp(ext_path_str + ext_path_length - 3, "lib") != 0) {
-      if (ext_path_length < JVM_MAXPATHLEN - 4) {
-        jio_snprintf(ext_path_str + ext_path_length, sizeof(ext_path_str) - ext_path_length, "%slib", os::file_separator());
-        ext_path_length += 4;
-      }
-    }
-  }
-  if (ext_path_length < JVM_MAXPATHLEN - 10) {
-    jio_snprintf(ext_path_str + ext_path_length, sizeof(ext_path_str) - ext_path_length,
-                 "%shotswap%shotswap-agent.jar", os::file_separator(), os::file_separator());
-  }
-
-  int fd = ::open(ext_path_str, O_RDONLY);
-  if (fd >= 0) {
-    os::close(fd);
-    size_t length = strlen(ext_path_str) + 1;
-    char *options = NEW_C_HEAP_ARRAY(char,  length, mtArguments);
-    jio_snprintf(options, length, "%s", ext_path_str);
-    add_init_agent("instrument", ext_path_str, false);
-    jio_fprintf(defaultStream::output_stream(), "Starting HotswapAgent '%s'\n", ext_path_str);
-  }
-  else
-  {
-    jio_fprintf(defaultStream::error_stream(), "HotswapAgent not found on path:'%s'\n", ext_path_str);
-  }
-}
-
 size_t Arguments::max_heap_for_compressed_oops() {
   // Avoid sign flip.
   assert(OopEncodingHeapMax > (uint64_t)os::vm_page_size(), "Unusual page size");
@@ -3919,10 +3881,6 @@ jint Arguments::parse(const JavaVMInitArgs* initial_cmd_args) {
   UNSUPPORTED_OPTION(UseLargePages);
 #endif
 
-#if defined(AIX)
-  UNSUPPORTED_OPTION(AllocateHeapAt);
-#endif
-
   ArgumentsExt::report_unsupported_options();
 
 #ifndef PRODUCT
@@ -3951,10 +3909,7 @@ jint Arguments::parse(const JavaVMInitArgs* initial_cmd_args) {
   // Set object alignment values.
   set_object_alignment();
 
-  // Set HotswapAgent
-  if (!DisableHotswapAgent) {
-    setup_hotswap_agent();
-  }
+  setup_hotswap_agent();
 
 #if !INCLUDE_CDS
   if (DumpSharedSpaces || RequireSharedSpaces) {
@@ -4288,4 +4243,58 @@ bool Arguments::copy_expand_pid(const char* src, size_t srclen,
   }
   *b = '\0';
   return (p == src_end); // return false if not all of the source was copied
+}
+
+void Arguments::setup_hotswap_agent() {
+
+  if (!AllowEnhancedClassRedefinition)
+    return;
+
+  // Set HotswapAgent
+  if (!DisableHotswapAgent) {
+
+    char ext_path_str[JVM_MAXPATHLEN];
+
+    os::jvm_path(ext_path_str, sizeof(ext_path_str));
+    for (int i = 0; i < 3; i++) {
+      char *end = strrchr(ext_path_str, *os::file_separator());
+      if (end != NULL) *end = '\0';
+    }
+    size_t ext_path_length = strlen(ext_path_str);
+    if (ext_path_length >= 3) {
+      if (strcmp(ext_path_str + ext_path_length - 3, "lib") != 0) {
+        if (ext_path_length < JVM_MAXPATHLEN - 4) {
+          jio_snprintf(ext_path_str + ext_path_length, sizeof(ext_path_str) - ext_path_length, "%slib", os::file_separator());
+          ext_path_length += 4;
+        }
+      }
+    }
+    if (ext_path_length < JVM_MAXPATHLEN - 10) {
+      jio_snprintf(ext_path_str + ext_path_length, sizeof(ext_path_str) - ext_path_length,
+                   "%shotswap%shotswap-agent.jar", os::file_separator(), os::file_separator());
+    }
+
+    int fd = ::open(ext_path_str, O_RDONLY);
+    if (fd >= 0) {
+      os::close(fd);
+      size_t length = strlen(ext_path_str) + 1;
+      char *options = NEW_C_HEAP_ARRAY(char,  length, mtArguments);
+      jio_snprintf(options, length, "%s", ext_path_str);
+      add_init_agent("instrument", ext_path_str, false);
+      jio_fprintf(defaultStream::output_stream(), "Starting HotswapAgent '%s'\n", ext_path_str);
+    }
+    else
+    {
+      jio_fprintf(defaultStream::error_stream(), "HotswapAgent not found on path:'%s'\n", ext_path_str);
+    }
+  }
+
+  // TODO: open it only for org.hotswap.agent module
+  // Use to access java.lang.reflect.Proxy/proxyCache
+  create_numbered_property("jdk.module.addopens", "java.base/java.lang=ALL-UNNAMED", addopens_count++);
+  // Class of  field java.lang.reflect.Proxy/proxyCache
+  create_numbered_property("jdk.module.addopens", "java.base/jdk.internal.loader=ALL-UNNAMED", addopens_count++);
+  // java.beans.Introspector access
+  create_numbered_property("jdk.module.addopens", "java.desktop/java.beans=ALL-UNNAMED", addopens_count++);
+
 }
