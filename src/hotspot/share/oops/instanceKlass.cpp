@@ -172,6 +172,7 @@ bool InstanceKlass::has_nest_member(InstanceKlass* k, TRAPS) const {
       // names match so check actual klass - this may trigger class loading if
       // it doesn't match (but that should be impossible)
       Klass* k2 = _constants->klass_at(cp_index, CHECK_false);
+      k2 = k2->newest_version();
       if (k2 == k) {
         log_trace(class, nestmates)("- class is listed as a nest member");
         return true;
