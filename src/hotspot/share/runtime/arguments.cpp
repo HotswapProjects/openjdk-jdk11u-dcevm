@@ -4287,10 +4287,10 @@ void Arguments::setup_hotswap_agent() {
       add_init_agent("instrument", ext_path_str, false);
       jio_fprintf(defaultStream::output_stream(), "Starting HotswapAgent '%s'\n", ext_path_str);
     }
-    else
-    {
-      jio_fprintf(defaultStream::error_stream(), "HotswapAgent not found on path:'%s'\n", ext_path_str);
-    }
+//    else
+//    {
+//      jio_fprintf(defaultStream::error_stream(), "HotswapAgent not found on path:'%s'\n", ext_path_str);
+//    }
   }
 
   // TODO: open it only for org.hotswap.agent module
