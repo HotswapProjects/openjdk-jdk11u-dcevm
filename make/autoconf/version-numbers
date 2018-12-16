@@ -44,8 +44,8 @@ PRODUCT_NAME=OpenJDK
 PRODUCT_SUFFIX="Runtime Environment"
 JDK_RC_PLATFORM_NAME=Platform
 COMPANY_NAME=N/A
-HOTSPOT_VM_DISTRO="OpenJDK"
-VENDOR_URL=https://openjdk.java.net/
+HOTSPOT_VM_DISTRO="Dynamic Code Evolution"
+VENDOR_URL=https://github.com/TravaOpenJDK/trava-jdk-11-dcevm
 VENDOR_URL_BUG=https://bugreport.java.com/bugreport/
 VENDOR_URL_VM_BUG=https://bugreport.java.com/bugreport/crash.jsp
 
