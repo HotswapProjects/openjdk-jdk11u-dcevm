@@ -1738,6 +1738,12 @@ void VM_EnhancedRedefineClasses::flush_dependent_code(InstanceKlass* k_h, TRAPS)
   // FIXME: for now, deoptimize all!
   if (k_h != NULL && JvmtiExport::all_dependencies_are_recorded()) {
     CodeCache::flush_evol_dependents_on(k_h);
+    Klass* superCl = k_h->super();
+    // Deoptimize super classes since redefined class can has a new method override
+    while (superCl != NULL && !superCl->is_redefining()) {
+      CodeCache::flush_evol_dependents_on(InstanceKlass::cast(superCl));
+      superCl = superCl->super();
+    }
   } else {
     CodeCache::mark_all_nmethods_for_deoptimization();
 
