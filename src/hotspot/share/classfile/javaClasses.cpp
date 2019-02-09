@@ -4193,12 +4193,14 @@ const char* java_lang_ClassLoader::describe_external(const oop loader) {
   if (!well_known_loader) {
     oop pl = java_lang_ClassLoader::parent(loader);
     ClassLoaderData *pl_cld = ClassLoaderData::class_loader_data(pl);
-    const char* parentName = pl_cld->loader_name_and_id();
-    if (pl != NULL) {
-      ss.print(", child of %s %s", parentName, pl->klass()->external_name());
-    } else {
-      // bootstrap loader
-      ss.print(", child of %s", parentName);
+    if (pl_cld != NULL) {
+      const char* parentName = pl_cld->loader_name_and_id();
+      if (pl != NULL) {
+        ss.print(", child of %s %s", parentName, pl->klass()->external_name());
+      } else {
+        // bootstrap loader
+        ss.print(", child of %s", parentName);
+      }
     }
   }
   ss.print(")");
