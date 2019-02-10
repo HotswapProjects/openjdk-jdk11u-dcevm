@@ -4251,6 +4251,9 @@ bool Arguments::copy_expand_pid(const char* src, size_t srclen,
 
 void Arguments::setup_hotswap_agent() {
 
+  if (DumpSharedSpaces)
+    return;
+
   if (!AllowEnhancedClassRedefinition)
     return;
 
