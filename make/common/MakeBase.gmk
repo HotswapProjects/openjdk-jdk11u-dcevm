@@ -981,7 +981,9 @@ DependOnVariableHelper = \
               $(info NewVariable $1: >$(strip $($1))<) \
               $(info OldVariable $1: >$(strip $($1_old))<)) \
           $(call WriteFile, $1_old:=$(call DoubleDollar,$(call EscapeHash,$($1))), \
-              $(call DependOnVariableFileName, $1, $2))) \
+ $(call DependOnVariableFileName, $1, $2)) \
+ $(eval $(call DependOnVariableFileName, $1, $2): ) \
+ ) \
         $(call DependOnVariableFileName, $1, $2) \
     )
 
