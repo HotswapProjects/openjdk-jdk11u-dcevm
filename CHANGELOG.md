@@ -2,6 +2,7 @@
 
 ## Dcevm-11.0.7+1 (2019-05-22)
 
+1. Skip GC runs for redefinitions without instance size change
 1. Better support for lambda class redefinition
 1. Fix access to com.sun.beans.util (HotswapAgent patch)
 1. Fix fallback mode to standard redefinition
