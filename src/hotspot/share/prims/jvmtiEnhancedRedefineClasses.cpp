@@ -54,6 +54,7 @@
 #include "utilities/events.hpp"
 #include "oops/constantPool.inline.hpp"
 #include "gc/cms/cmsHeap.hpp"
+#include "gc/g1/g1CollectedHeap.hpp"
 #include "gc/shared/dcevmSharedGC.hpp"
 
 Array<Method*>* VM_EnhancedRedefineClasses::_old_methods = NULL;
@@ -507,8 +508,13 @@ void VM_EnhancedRedefineClasses::doit() {
     // mark such nmethod's as "scavengable".
     // For now, mark all nmethod's as scavengable that are not scavengable already
     // For UseG1GC nmethods are already registered in G1Heap
-    if (ScavengeRootsInCode && !UseG1GC) {
-      CodeCache::nmethods_do(mark_as_scavengable);
+    if (ScavengeRootsInCode ) {
+      if (!UseG1GC) {
+        CodeCache::nmethods_do(mark_as_scavengable);
+      }
+    } else {
+      // is it necessary?
+      // G1CollectedHeap::heap()->rebuild_strong_code_roots();
     }
 
     Universe::heap()->ensure_parsability(false);
@@ -1436,15 +1442,17 @@ void VM_EnhancedRedefineClasses::ClearCpoolCacheAndUnpatch::do_klass(Klass* k) {
     }
   }
 
-  // DCEVM - clear whole cache (instead special methods for class/method update in standard redefinition)
-  ConstantPoolCache* cp_cache = other_cp->cache();
-  if (cp_cache != NULL) {
-    cp_cache->clear_entries();
-  }
+  if (!k->is_deoptimization_excl()) {
+    // DCEVM - clear whole cache (instead special methods for class/method update in standard redefinition)
+    ConstantPoolCache* cp_cache = other_cp->cache();
+    if (cp_cache != NULL) {
+      cp_cache->clear_entries();
+    }
 
-  // If bytecode rewriting is enabled, we also need to unpatch bytecode to force resolution of zeroed entries
-  if (RewriteBytecodes) {
-    ik->methods_do(unpatch_bytecode);
+    // If bytecode rewriting is enabled, we also need to unpatch bytecode to force resolution of zeroed entries
+    if (RewriteBytecodes) {
+      ik->methods_do(unpatch_bytecode);
+    }
   }
 }
 

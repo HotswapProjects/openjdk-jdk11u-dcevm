@@ -1394,6 +1394,35 @@ InstanceKlass* SystemDictionary::load_shared_class(InstanceKlass* ik,
     // notify a class loaded from shared object
     ClassLoadingService::notify_class_loaded(ik, true /* shared class */);
 
+    if (ik->external_name() != NULL && HotswapExcludeDeoptClassPath != NULL) {
+      ResourceMark rm;
+
+      const char* deopt_path = HotswapExcludeDeoptClassPath;
+      const char* const end = deopt_path + strlen(deopt_path);
+      bool deopt_found = false;
+      while (!deopt_found && deopt_path < end) {
+        const char* tmp_end = strchr(deopt_path, ',');
+        if (tmp_end == NULL) {
+          tmp_end = end;
+        }
+        int size = tmp_end - deopt_path + 1;
+        char* deopt_segm_path = NEW_RESOURCE_ARRAY(char, size);
+        memcpy(deopt_segm_path, deopt_path, tmp_end - deopt_path);
+        deopt_segm_path[tmp_end - deopt_path] = '\0';
+        if (deopt_segm_path[0] == '-' && strncmp(deopt_segm_path+1, ik->external_name(), strlen(deopt_segm_path+1)) == 0) {
+          FREE_RESOURCE_ARRAY(char, deopt_segm_path, size);
+          break;;
+        }
+        if (strncmp(deopt_segm_path, ik->external_name(), strlen(deopt_segm_path)) == 0) {
+          log_trace(redefine, class, load)("Excluding from deoptimization : %s", ik->external_name());
+          ik->set_deoptimization_excl(true);
+          deopt_found = true;
+        }
+        FREE_RESOURCE_ARRAY(char, deopt_segm_path, size);
+        deopt_path = tmp_end + 1;
+      }
+    }
+
     ik->set_has_passed_fingerprint_check(false);
     if (UseAOT && ik->supers_have_passed_fingerprint_checks()) {
       uint64_t aot_fp = AOTLoader::get_saved_fingerprint(ik);
