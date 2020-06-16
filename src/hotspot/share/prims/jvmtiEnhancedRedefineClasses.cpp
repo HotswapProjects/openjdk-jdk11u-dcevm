@@ -212,9 +212,12 @@ class FieldCopier : public FieldClosure {
 
 // TODO: review...
 void VM_EnhancedRedefineClasses::mark_as_scavengable(nmethod* nm) {
+  Universe::heap()->register_nmethod(nm);
+  /*
   if (!nm->on_scavenge_root_list()) {
     CodeCache::add_scavenge_root_nmethod(nm);
   }
+  */
 }
 
 // TODO comment
@@ -507,14 +510,8 @@ void VM_EnhancedRedefineClasses::doit() {
     // make sure such references are properly recognized by GC. For that, If ScavengeRootsInCode is true, we need to
     // mark such nmethod's as "scavengable".
     // For now, mark all nmethod's as scavengable that are not scavengable already
-    // For UseG1GC nmethods are already registered in G1Heap
-    if (ScavengeRootsInCode ) {
-      if (!UseG1GC) {
-        CodeCache::nmethods_do(mark_as_scavengable);
-      }
-    } else {
-      // is it necessary?
-      // G1CollectedHeap::heap()->rebuild_strong_code_roots();
+    if (ScavengeRootsInCode) {
+      CodeCache::nmethods_do(mark_as_scavengable);
     }
 
     Universe::heap()->ensure_parsability(false);
