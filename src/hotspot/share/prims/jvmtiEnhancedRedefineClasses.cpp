@@ -54,7 +54,6 @@
 #include "utilities/events.hpp"
 #include "oops/constantPool.inline.hpp"
 #include "gc/cms/cmsHeap.hpp"
-#include "gc/g1/g1CollectedHeap.hpp"
 #include "gc/shared/dcevmSharedGC.hpp"
 
 Array<Method*>* VM_EnhancedRedefineClasses::_old_methods = NULL;
@@ -212,12 +211,16 @@ class FieldCopier : public FieldClosure {
 
 // TODO: review...
 void VM_EnhancedRedefineClasses::mark_as_scavengable(nmethod* nm) {
-  Universe::heap()->register_nmethod(nm);
-  /*
   if (!nm->on_scavenge_root_list()) {
     CodeCache::add_scavenge_root_nmethod(nm);
   }
-  */
+}
+
+void VM_EnhancedRedefineClasses::mark_as_scavengable_g1(nmethod* nm) {
+  // It should work not only for G1 but also for another GCs, but this way is safer now
+  if (!nm->is_zombie() && !nm->is_unloaded()) {
+    Universe::heap()->register_nmethod(nm);
+  }
 }
 
 // TODO comment
@@ -511,7 +514,12 @@ void VM_EnhancedRedefineClasses::doit() {
     // mark such nmethod's as "scavengable".
     // For now, mark all nmethod's as scavengable that are not scavengable already
     if (ScavengeRootsInCode) {
-      CodeCache::nmethods_do(mark_as_scavengable);
+      if (UseG1GC) {
+        // this should work also for other GCs
+        CodeCache::nmethods_do(mark_as_scavengable_g1);
+      } else {
+        CodeCache::nmethods_do(mark_as_scavengable);
+      }
     }
 
     Universe::heap()->ensure_parsability(false);
