@@ -2683,7 +2683,7 @@ define_pd_global(uint64_t,MaxRAM,                    1ULL*G);
              "Allow enhanced class redefinition beyond swapping method "    \
              "bodies")                                                      \
                                                                             \
-  product(bool, DisableHotswapAgent, DISABLED_HOTSWAP_AGENT,                \
+  product(bool, DisableHotswapAgent, true,                                  \
              "Disable integrated Hotswap Agent (HotswapVM only)")           \
                                                                             \
   product(ccstr, HotswapExcludeDeoptClassPath,                              \
