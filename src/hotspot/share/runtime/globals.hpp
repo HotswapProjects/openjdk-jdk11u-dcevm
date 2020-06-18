@@ -2691,24 +2691,31 @@ define_pd_global(uint64_t,MaxRAM,                    1ULL*G);
   experimental(bool, UseFastUnorderedTimeStamps, false,                     \
           "Use platform unstable time where supported for timestamps only") \
                                                                             \
-  product(bool, AllowEnhancedClassRedefinition, true,                       \
+  product(bool, AllowEnhancedClassRedefinition, false,                      \
              "Allow enhanced class redefinition beyond swapping method "    \
              "bodies")                                                      \
                                                                             \
-  product(bool, DisableHotswapAgent, DISABLED_HOTSWAP_AGENT,                \
-             "Disable integrated Hotswap Agent (HotswapVM only)")           \
-                                                                            \
-  product(bool, UseHotswapDeoptExclusion, false,                           \
+  experimental(bool, UseHotswapDeoptExclusion, false,                       \
           "Use deoptimization exclusion. "                                  \
           "If true then HotswapExcludeDeoptClassPath is activated")         \
                                                                             \
-  product(ccstr, HotswapExcludeDeoptClassPath,                              \
+  experimental(ccstr, HotswapExcludeDeoptClassPath,                         \
           "-jdk.internal.reflect.Generated,-java.lang.invoke.LambdaForm$DMH"\
           ",-java.lang.invoke.LambdaForm$MH,java.,jdk.",                    \
           "Comma separated list of packages, that are excluded from "       \
           "deoptimization of cache code after advanced hotswap. "           \
           "Must be activated by UseHotswapDeoptExclusion."                  \
-          "default value=<java,jdk without dynamic java/jdk classes>")
+          "default value=<java,jdk without dynamic java/jdk classes>")      \
+                                                                            \
+  product(ccstr, HotswapAgent, "disabled",                                  \
+          "Specify HotswapAgent image to be used."                          \
+          "disabled: hotswap agent is disabled (default)"                   \
+          "fatjar: full HA. Use integrated hotswap-agent.jar"               \
+          "core: core HA. Use integrated hotswap-agent-core.jar"            \
+          "external: external HA. use external HA, open required JDK "      \
+          "modules.")                                                       \
+          constraint(HotswapAgentConstraintFunc, AfterErgo)
+
 
 #define VM_FLAGS(develop,                                                   \
                  develop_pd,                                                \
