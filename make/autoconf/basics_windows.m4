@@ -309,9 +309,9 @@ AC_DEFUN([BASIC_FIXUP_EXECUTABLE_MSYS],
 AC_DEFUN([BASIC_CHECK_PATHS_WINDOWS],
 [
   SRC_ROOT_LENGTH=`$THEPWDCMD -L|$WC -m`
-  if test $SRC_ROOT_LENGTH -gt 100; then
-    AC_MSG_ERROR([Your base path is too long. It is $SRC_ROOT_LENGTH characters long, but only 100 is supported])
-  fi
+  # if test $SRC_ROOT_LENGTH -gt 100; then
+  #  AC_MSG_ERROR([Your base path is too long. It is $SRC_ROOT_LENGTH characters long, but only 100 is supported])
+  # fi
 
   if test "x$OPENJDK_BUILD_OS_ENV" = "xwindows.cygwin"; then
     AC_MSG_CHECKING([cygwin release])
