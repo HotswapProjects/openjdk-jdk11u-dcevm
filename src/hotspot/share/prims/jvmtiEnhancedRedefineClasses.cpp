@@ -601,8 +601,6 @@ void VM_EnhancedRedefineClasses::doit() {
       _timer_heap_full_gc.start();
     }
 
-    G1CollectedHeap::heap()->object_par_iterate(&objectClosure);
-
     Universe::set_redefining_gc_run(true);
     notify_gc_begin(true);
     // TODO: check _metadata_GC_clear_soft_refs with ScavengeRootsInCode
