@@ -5687,7 +5687,7 @@ void ClassFileParser::fill_instance_klass(InstanceKlass* ik, bool changed_by_loa
 
   ClassLoadingService::notify_class_loaded(ik, false /* not shared class */);
 
-  if (AllowEnhancedClassRedefinition && ik->external_name() != NULL && HotswapExcludeDeoptClassPath != NULL) {
+  if (UseHotswapDeoptExclusion && ik->external_name() != NULL && HotswapExcludeDeoptClassPath != NULL) {
     ResourceMark rm;
 
     const char* deopt_path = HotswapExcludeDeoptClassPath;

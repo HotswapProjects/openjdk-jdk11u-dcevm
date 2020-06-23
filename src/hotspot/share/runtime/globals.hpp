@@ -2686,12 +2686,17 @@ define_pd_global(uint64_t,MaxRAM,                    1ULL*G);
   product(bool, DisableHotswapAgent, true,                                  \
              "Disable integrated Hotswap Agent (HotswapVM only)")           \
                                                                             \
+  product(bool, UseHotswapDeoptExclusion, false,                           \
+          "Use deoptimization exclusion. "                                  \
+          "If true then HotswapExcludeDeoptClassPath is activated")         \
+                                                                            \
   product(ccstr, HotswapExcludeDeoptClassPath,                              \
           "-jdk.internal.reflect.Generated,-java.lang.invoke.LambdaForm$DMH"\
           ",-java.lang.invoke.LambdaForm$MH,java.,jdk.",                    \
-          "Comma separated list of packages that are excluded from "        \
+          "Comma separated list of packages, that are excluded from "       \
           "deoptimization of cache code after advanced hotswap. "           \
-          "default=<java,jdk without dynamic java/jdk classes>")
+          "Must be activated by UseHotswapDeoptExclusion."                  \
+          "default value=<java,jdk without dynamic java/jdk classes>")
 
 #define VM_FLAGS(develop,                                                   \
                  develop_pd,                                                \

@@ -1394,7 +1394,7 @@ InstanceKlass* SystemDictionary::load_shared_class(InstanceKlass* ik,
     // notify a class loaded from shared object
     ClassLoadingService::notify_class_loaded(ik, true /* shared class */);
 
-    if (AllowEnhancedClassRedefinition && ik->external_name() != NULL && HotswapExcludeDeoptClassPath != NULL) {
+    if (UseHotswapDeoptExclusion && ik->external_name() != NULL && HotswapExcludeDeoptClassPath != NULL) {
       ResourceMark rm;
 
       const char* deopt_path = HotswapExcludeDeoptClassPath;
