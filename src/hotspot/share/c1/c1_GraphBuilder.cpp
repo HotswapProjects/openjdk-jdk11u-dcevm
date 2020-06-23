@@ -3784,7 +3784,7 @@ bool GraphBuilder::try_inline_full(ciMethod* callee, bool holder_known, bool ign
     INLINE_BAILOUT("mdo allocation failed");
   }
 
-  if (UseHotswapDeoptExclusion && (callee->holder()->is_deoptimization_excl() ^ method()->holder()->is_deoptimization_excl())) {
+  if (UseHotswapDeoptExclusion && (!callee->holder()->is_deoptimization_excl() && method()->holder()->is_deoptimization_excl())) {
     INLINE_BAILOUT("callee is in different exclusion region then the caller");
   }
 
