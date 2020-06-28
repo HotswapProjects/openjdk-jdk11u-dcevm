@@ -2684,9 +2684,10 @@ define_pd_global(uint64_t,MaxRAM,                    1ULL*G);
              "bodies")                                                      \
                                                                             \
   product(bool, DisableHotswapAgent, true,                                  \
-             "Disable integrated Hotswap Agent (HotswapVM only)")           \
+             "(Deprecated) Disable integrated Hotswap Agent"                \
+             "(HotswapVM only)")                                            \
                                                                             \
-  product(bool, UseHotswapDeoptExclusion, false,                           \
+  product(bool, UseHotswapDeoptExclusion, false,                            \
           "Use deoptimization exclusion. "                                  \
           "If true then HotswapExcludeDeoptClassPath is activated")         \
                                                                             \
@@ -2696,7 +2697,13 @@ define_pd_global(uint64_t,MaxRAM,                    1ULL*G);
           "Comma separated list of packages, that are excluded from "       \
           "deoptimization of cache code after advanced hotswap. "           \
           "Must be activated by UseHotswapDeoptExclusion."                  \
-          "default value=<java,jdk without dynamic java/jdk classes>")
+          "default value=<java,jdk without dynamic java/jdk classes>")      \
+                                                                            \
+  product(bool, EnableHA, false,                                            \
+          "Enable integrated HotswapAgent.")                                \
+                                                                            \
+  product(bool, EnableHACore, false,                                        \
+          "Enable integrated HotswapAgent core.")
 
 #define VM_FLAGS(develop,                                                   \
                  develop_pd,                                                \
