@@ -2679,19 +2679,15 @@ define_pd_global(uint64_t,MaxRAM,                    1ULL*G);
   experimental(bool, UseFastUnorderedTimeStamps, false,                     \
           "Use platform unstable time where supported for timestamps only") \
                                                                             \
-  product(bool, AllowEnhancedClassRedefinition, true,                       \
+  product(bool, AllowEnhancedClassRedefinition, false,                      \
              "Allow enhanced class redefinition beyond swapping method "    \
              "bodies")                                                      \
                                                                             \
-  product(bool, DisableHotswapAgent, true,                                  \
-             "(Deprecated) Disable integrated Hotswap Agent"                \
-             "(HotswapVM only)")                                            \
-                                                                            \
-  product(bool, UseHotswapDeoptExclusion, false,                            \
+  experimental(bool, UseHotswapDeoptExclusion, false,                       \
           "Use deoptimization exclusion. "                                  \
           "If true then HotswapExcludeDeoptClassPath is activated")         \
                                                                             \
-  product(ccstr, HotswapExcludeDeoptClassPath,                              \
+  experimental(ccstr, HotswapExcludeDeoptClassPath,                         \
           "-jdk.internal.reflect.Generated,-java.lang.invoke.LambdaForm$DMH"\
           ",-java.lang.invoke.LambdaForm$MH,java.,jdk.",                    \
           "Comma separated list of packages, that are excluded from "       \
@@ -2700,10 +2696,13 @@ define_pd_global(uint64_t,MaxRAM,                    1ULL*G);
           "default value=<java,jdk without dynamic java/jdk classes>")      \
                                                                             \
   product(bool, EnableHA, false,                                            \
-          "Enable integrated HotswapAgent.")                                \
+          "Enable integrated HotswapAgent, if exists in jdk distribution."  \
+          "This option also opens modules necessary for accessed by HA.")   \
                                                                             \
   product(bool, EnableHACore, false,                                        \
-          "Enable integrated HotswapAgent core.")
+          "Enable integrated HotswapAgent core, , if exists in jdk "        \
+          "distribution. This option also opens modules necessary "         \
+          "for accessed by HA.")
 
 #define VM_FLAGS(develop,                                                   \
                  develop_pd,                                                \
