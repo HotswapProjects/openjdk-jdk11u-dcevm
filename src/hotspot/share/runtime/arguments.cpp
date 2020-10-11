@@ -4303,14 +4303,17 @@ void Arguments::setup_hotswap_agent() {
   if (DumpSharedSpaces)
     return;
 
-  if (!AllowEnhancedClassRedefinition && !EnableHA && !EnableHACore)
+  if (HotswapAgent == NULL || strcmp(HotswapAgent, "disabled") == 0)
     return;
 
-  // Set HotswapAgent
-  if (EnableHA || EnableHACore) {
+  // Force AllowEnhancedClassRedefinition if HA is enabled
+  AllowEnhancedClassRedefinition = true;
 
-    // Force AllowEnhancedClassRedefinition if HA is enabled
-    AllowEnhancedClassRedefinition = true;
+  bool ha_fatjar = strcmp(HotswapAgent, "fatjar") == 0;
+  bool ha_core = strcmp(HotswapAgent, "core") == 0;
+
+  // Set HotswapAgent
+  if (ha_fatjar || ha_core) {
 
     char ext_path_str[JVM_MAXPATHLEN];
 
@@ -4329,7 +4332,7 @@ void Arguments::setup_hotswap_agent() {
       }
     }
     if (ext_path_length < JVM_MAXPATHLEN - 10) {
-      if (EnableHA) {
+      if (ha_fatjar) {
         jio_snprintf(ext_path_str + ext_path_length, sizeof(ext_path_str) - ext_path_length,
                      "%shotswap%shotswap-agent.jar", os::file_separator(), os::file_separator());
       } else {
@@ -4345,23 +4348,27 @@ void Arguments::setup_hotswap_agent() {
         add_init_agent("instrument", ext_path_str, false);
         jio_fprintf(defaultStream::output_stream(), "Starting HotswapAgent '%s'\n", ext_path_str);
       }
+      else
+      {
+        jio_fprintf(defaultStream::error_stream(), "HotswapAgent not found on path:'%s'!\n", ext_path_str);
+      }
     }
-
-    // TODO: open it only for org.hotswap.agent module
-    // Use to access java.lang.reflect.Proxy/proxyCache
-    create_numbered_property("jdk.module.addopens", "java.base/java.lang=ALL-UNNAMED", addopens_count++);
-    // Class of  field java.lang.reflect.Proxy/proxyCache
-    create_numbered_property("jdk.module.addopens", "java.base/jdk.internal.loader=ALL-UNNAMED", addopens_count++);
-    // Use to access java.io.Reader, java.io.InputStream, java.io.FileInputStream
-    create_numbered_property("jdk.module.addopens", "java.base/java.io=ALL-UNNAMED", addopens_count++);
-    // java.beans.Introspector access
-    create_numbered_property("jdk.module.addopens", "java.desktop/java.beans=ALL-UNNAMED", addopens_count++);
-    // java.beans.Introspector access
-    create_numbered_property("jdk.module.addopens", "java.desktop/com.sun.beans=ALL-UNNAMED", addopens_count++);
-    // com.sun.beans.introspect.ClassInfo access
-    create_numbered_property("jdk.module.addopens", "java.desktop/com.sun.beans.introspect=ALL-UNNAMED", addopens_count++);
-    // com.sun.beans.introspect.util.Cache access
-    create_numbered_property("jdk.module.addopens", "java.desktop/com.sun.beans.util=ALL-UNNAMED", addopens_count++);
   }
+
+  // TODO: open it only for org.hotswap.agent module
+  // Use to access java.lang.reflect.Proxy/proxyCache
+  create_numbered_property("jdk.module.addopens", "java.base/java.lang=ALL-UNNAMED", addopens_count++);
+  // Class of  field java.lang.reflect.Proxy/proxyCache
+  create_numbered_property("jdk.module.addopens", "java.base/jdk.internal.loader=ALL-UNNAMED", addopens_count++);
+  // Use to access java.io.Reader, java.io.InputStream, java.io.FileInputStream
+  create_numbered_property("jdk.module.addopens", "java.base/java.io=ALL-UNNAMED", addopens_count++);
+  // java.beans.Introspector access
+  create_numbered_property("jdk.module.addopens", "java.desktop/java.beans=ALL-UNNAMED", addopens_count++);
+  // java.beans.Introspector access
+  create_numbered_property("jdk.module.addopens", "java.desktop/com.sun.beans=ALL-UNNAMED", addopens_count++);
+  // com.sun.beans.introspect.ClassInfo access
+  create_numbered_property("jdk.module.addopens", "java.desktop/com.sun.beans.introspect=ALL-UNNAMED", addopens_count++);
+  // com.sun.beans.introspect.util.Cache access
+  create_numbered_property("jdk.module.addopens", "java.desktop/com.sun.beans.util=ALL-UNNAMED", addopens_count++);
 
 }

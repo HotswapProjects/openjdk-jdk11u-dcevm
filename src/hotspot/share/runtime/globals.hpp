@@ -2695,14 +2695,15 @@ define_pd_global(uint64_t,MaxRAM,                    1ULL*G);
           "Must be activated by UseHotswapDeoptExclusion."                  \
           "default value=<java,jdk without dynamic java/jdk classes>")      \
                                                                             \
-  product(bool, EnableHA, false,                                            \
-          "Enable integrated HotswapAgent, if exists in jdk distribution."  \
-          "This option also opens modules necessary for accessed by HA.")   \
-                                                                            \
-  product(bool, EnableHACore, false,                                        \
-          "Enable integrated HotswapAgent core, , if exists in jdk "        \
-          "distribution. This option also opens modules necessary "         \
-          "for accessed by HA.")
+  product(ccstr, HotswapAgent, "disabled",                                  \
+          "Specify HotswapAgent image to be used."                          \
+          "disabled: hotswap agent is disabled (default)"                   \
+          "fatjar: full HA. Use integrated hotswap-agent.jar"               \
+          "core: core HA. Use integrated hotswap-agent-core.jar"            \
+          "external: external HA. use external HA, open required JDK "      \
+          "modules.")                                                       \
+          constraint(HotswapAgentConstraintFunc, AfterErgo)
+
 
 #define VM_FLAGS(develop,                                                   \
                  develop_pd,                                                \
