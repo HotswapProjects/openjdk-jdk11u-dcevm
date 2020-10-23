@@ -41,7 +41,7 @@ CompiledMethod::CompiledMethod(Method* method, const char* name, CompilerType ty
   : CodeBlob(name, type, layout, frame_complete_offset, frame_size, oop_maps, caller_must_gc_arguments),
   _method(method), _mark_for_deoptimization_status(not_marked) {
   init_defaults();
-  if (method != NULL) {
+  if (AllowEnhancedClassRedefinition && method != NULL) {
     _deoptimization_excl = method->method_holder()->is_deoptimization_excl();
   }
 }
@@ -50,7 +50,7 @@ CompiledMethod::CompiledMethod(Method* method, const char* name, CompilerType ty
   : CodeBlob(name, type, CodeBlobLayout((address) this, size, header_size, cb), cb, frame_complete_offset, frame_size, oop_maps, caller_must_gc_arguments),
   _method(method), _mark_for_deoptimization_status(not_marked) {
   init_defaults();
-  if (method != NULL) {
+  if (AllowEnhancedClassRedefinition && method != NULL) {
     _deoptimization_excl = method->method_holder()->is_deoptimization_excl();
   }
 }
