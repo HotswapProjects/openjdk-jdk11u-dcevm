@@ -2688,7 +2688,7 @@ define_pd_global(uint64_t,MaxRAM,                    1ULL*G);
   experimental(bool, UseFastUnorderedTimeStamps, false,                     \
           "Use platform unstable time where supported for timestamps only") \
                                                                             \
-  product(bool, AllowEnhancedClassRedefinition, false,                      \
+  product(bool, AllowEnhancedClassRedefinition, true,                       \
              "Allow enhanced class redefinition beyond swapping method "    \
              "bodies")                                                      \
                                                                             \
