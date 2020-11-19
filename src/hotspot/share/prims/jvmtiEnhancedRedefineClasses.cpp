@@ -506,9 +506,6 @@ void VM_EnhancedRedefineClasses::doit() {
     ClearCpoolCacheAndUnpatch clear_cpool_cache(thread);
     ClassLoaderDataGraph::classes_do(&clear_cpool_cache);
 
-
-    // SystemDictionary::methods_do(fix_invoke_method);
-
   // JSR-292 support
   if (_any_class_has_resolved_methods) {
     bool trace_name_printed = false;
@@ -1514,30 +1511,6 @@ void VM_EnhancedRedefineClasses::MethodDataCleaner::do_klass(Klass* k) {
     }
   }
 }
-
-void VM_EnhancedRedefineClasses::fix_invoke_method(Method* method) {
-
-  constantPoolHandle other_cp = constantPoolHandle(method->constants());
-
-  for (int i = 0; i < other_cp->length(); i++) {
-    if (other_cp->tag_at(i).is_klass()) {
-      Klass* klass = other_cp->resolved_klass_at(i);
-      if (klass->new_version() != NULL) {
-        // Constant pool entry points to redefined class -- update to the new version
-        other_cp->klass_at_put(i, klass->newest_version());
-      }
-      assert(other_cp->resolved_klass_at(i)->new_version() == NULL, "Must be new klass!");
-    }
-  }
-
-  ConstantPoolCache* cp_cache = other_cp->cache();
-  if (cp_cache != NULL) {
-    cp_cache->clear_entries();
-  }
-
-}
-
-
 
 void VM_EnhancedRedefineClasses::update_jmethod_ids() {
   for (int j = 0; j < _matching_methods_length; ++j) {
