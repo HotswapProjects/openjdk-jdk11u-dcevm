@@ -245,7 +245,7 @@ void ResolvedMethodTable::adjust_method_entries(bool * trace_name_printed) {
 void ResolvedMethodTable::adjust_method_entries_dcevm(bool * trace_name_printed) {
   assert(SafepointSynchronize::is_at_safepoint(), "only called at safepoint");
   // For each entry in RMT, change to new method
-  GrowableArray<oop>* oops_to_add = new GrowableArray<oop>();
+  GrowableArray<oop> oops_to_add(0);
 
   for (int i = 0; i < _the_table->table_size(); ++i) {
     for (ResolvedMethodEntry* entry = _the_table->bucket(i);
@@ -286,7 +286,7 @@ void ResolvedMethodTable::adjust_method_entries_dcevm(bool * trace_name_printed)
         java_lang_invoke_ResolvedMethodName::set_vmholder_offset(mem_name, newer_method);
 
         newer_klass->set_has_resolved_methods();
-        oops_to_add->append(mem_name);
+        oops_to_add.append(mem_name);
 
         ResourceMark rm;
         if (!(*trace_name_printed)) {
@@ -298,8 +298,8 @@ void ResolvedMethodTable::adjust_method_entries_dcevm(bool * trace_name_printed)
            newer_method->name()->as_C_string(), newer_method->signature()->as_C_string());
       }
     }
-    for (int i = 0; i < oops_to_add->length(); i++) {
-        oop mem_name = oops_to_add->at(i);
+    for (int i = 0; i < oops_to_add.length(); i++) {
+        oop mem_name = oops_to_add.at(i);
         Method* method = (Method*)java_lang_invoke_ResolvedMethodName::vmtarget(mem_name);
         _the_table->basic_add(method, Handle(Thread::current(), mem_name));
     }
