@@ -70,6 +70,7 @@ class VM_EnhancedRedefineClasses: public VM_GC_Operation {
   JvmtiClassLoadKind          _class_load_kind;
 
   GrowableArray<InstanceKlass*>*      _new_classes;
+  GrowableArray<InstanceKlass*>*      _new_anonymous_classes;
   jvmtiError                  _res;
 
   // Set if any of the InstanceKlasses have entries in the ResolvedMethodTable
