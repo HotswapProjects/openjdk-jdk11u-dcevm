@@ -84,6 +84,7 @@ Klass*      VM_EnhancedRedefineClasses::_the_class_oop = NULL;
 VM_EnhancedRedefineClasses::VM_EnhancedRedefineClasses(jint class_count, const jvmtiClassDefinition *class_defs, JvmtiClassLoadKind class_load_kind) :
         VM_GC_Operation(Universe::heap()->total_collections(), GCCause::_heap_inspection, Universe::heap()->total_full_collections(), true) {
   _affected_klasses = NULL;
+  _new_anonymous_classes = NULL;
   _class_count = class_count;
   _class_defs = class_defs;
   _class_load_kind = class_load_kind;
@@ -159,6 +160,8 @@ bool VM_EnhancedRedefineClasses::doit_prologue() {
         cld->add_to_deallocate_list(InstanceKlass::cast(_new_classes[i]));
       }
     }*/
+    delete _new_anonymous_classes;
+    _new_anonymous_classes = NULL;
     delete _new_classes;
     _new_classes = NULL;
     delete _affected_klasses;
@@ -679,6 +682,10 @@ void VM_EnhancedRedefineClasses::doit_epilogue() {
     delete _new_classes;
   }
   _new_classes = NULL;
+  if (_new_anonymous_classes != NULL) {
+    delete _new_anonymous_classes;
+  }
+  _new_anonymous_classes = NULL;
   if (_affected_klasses != NULL) {
     delete _affected_klasses;
   }
@@ -732,6 +739,7 @@ jvmtiError VM_EnhancedRedefineClasses::load_new_class_versions(TRAPS) {
 
   _affected_klasses = new (ResourceObj::C_HEAP, mtInternal) GrowableArray<Klass*>(_class_count, true);
   _new_classes = new (ResourceObj::C_HEAP, mtInternal) GrowableArray<InstanceKlass*>(_class_count, true);
+  _new_anonymous_classes = new (ResourceObj::C_HEAP, mtInternal) GrowableArray<InstanceKlass*>(0, true);
 
   ResourceMark rm(THREAD);
 
@@ -820,6 +828,7 @@ jvmtiError VM_EnhancedRedefineClasses::load_new_class_versions(TRAPS) {
                                          THREAD);
       k->class_loader_data()->exchange_holders(the_class->class_loader_data());
       the_class->class_loader_data()->inc_keep_alive();
+      _new_anonymous_classes->append(k);
     } else {
       k = SystemDictionary::resolve_from_stream(the_class_sym,
                                                   the_class_loader,
@@ -1369,6 +1378,12 @@ void VM_EnhancedRedefineClasses::calculate_instance_update_information(Klass* ne
 void VM_EnhancedRedefineClasses::rollback() {
   log_info(redefine, class, load)("Rolling back redefinition, result=%d", _res);
   ClassLoaderDataGraph::rollback_redefinition();
+
+  for (int i = 0; i < _new_anonymous_classes->length(); i++) {
+    InstanceKlass* k = _new_anonymous_classes->at(i);
+    k->class_loader_data()->exchange_holders(k->old_version()->class_loader_data());
+  }
+  _new_anonymous_classes->clear();
 
   for (int i = 0; i < _new_classes->length(); i++) {
     SystemDictionary::remove_from_hierarchy(_new_classes->at(i));
