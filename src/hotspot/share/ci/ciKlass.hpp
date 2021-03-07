@@ -131,6 +131,7 @@ public:
   const char* external_name() const;
 
   bool is_deoptimization_excl() { return get_Klass()->is_deoptimization_excl(); }
+  Klass* new_version() { return get_Klass()->new_version(); }
 };
 
 #endif // SHARE_VM_CI_CIKLASS_HPP
