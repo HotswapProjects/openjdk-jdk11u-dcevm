@@ -647,10 +647,6 @@ void VM_EnhancedRedefineClasses::doit() {
   // TODO: explain...
   ciObjectFactory::resort_shared_ci_metadata();
 
-  // FIXME - check if it was in JDK8. Copied from standard JDK9 hotswap.
-  //MethodDataCleaner clean_weak_method_links;
-  //ClassLoaderDataGraph::classes_do(&clean_weak_method_links);
-
   // Disable any dependent concurrent compilations
   SystemDictionary::notice_modification();
 
@@ -2061,11 +2057,22 @@ void VM_EnhancedRedefineClasses::dump_methods() {
 class AffectedKlassClosure : public KlassClosure {
  private:
    GrowableArray<Klass*>* _affected_klasses;
+   bool _is_anonymous;
  public:
-  AffectedKlassClosure(GrowableArray<Klass*>* affected_klasses) : _affected_klasses(affected_klasses) {}
+  AffectedKlassClosure(GrowableArray<Klass*>* affected_klasses) : _affected_klasses(affected_klasses), _is_anonymous(false) {}
+
+  bool is_anonymous() { return _is_anonymous; }
+  void set_anonymous(bool value) { _is_anonymous = value; }
 
   void do_klass(Klass* klass) {
     assert(!_affected_klasses->contains(klass), "must not occur more than once!");
+
+    if (_is_anonymous && klass->is_instance_klass()) {
+      InstanceKlass *ik = InstanceKlass::cast(klass);
+      if (ik->is_not_initialized()) {
+        return;  // anonymous class does not need to be initialized
+      }
+    }
 
     if (klass->new_version() != NULL) {
       return;
@@ -2125,11 +2132,13 @@ jvmtiError VM_EnhancedRedefineClasses::find_sorted_affected_classes(TRAPS) {
   // ClassLoaderDataGraph::classes_do(&closure);
 
   // 1. Scan over dictionaries
+  closure.set_anonymous(false);
   ClassLoaderDataGraph::dictionary_classes_do(&closure);
 
   // 2. Anonymous class is not in dictionary, we have to iterate anonymous cld directly, but there is race cond...
   // TODO: review ... anonymous class is added to cld before InstanceKlass initialization,
   //                  find out how to check if the InstanceKlass is initialized
+  closure.set_anonymous(true);
   ClassLoaderDataGraph::anonymous_classes_do(&closure);
 
   log_trace(redefine, class, load)("%d classes affected", _affected_klasses->length());
