@@ -519,10 +519,6 @@ void VM_EnhancedRedefineClasses::doit() {
     ClearCpoolCacheAndUnpatch clear_cpool_cache(thread);
     ClassLoaderDataGraph::classes_do(&clear_cpool_cache);
 
-<<<<<<< HEAD
-=======
-
->>>>>>> d0d459ba2ec (Fix line ending CRLF->LF)
   // JSR-292 support
   if (_any_class_has_resolved_methods) {
     bool trace_name_printed = false;
@@ -1552,7 +1548,6 @@ void VM_EnhancedRedefineClasses::ClearCpoolCacheAndUnpatch::do_klass(Klass* k) {
     }
   }
 
-<<<<<<< HEAD
   if (!k->is_deoptimization_excl()) {
     // DCEVM - clear whole cache (instead special methods for class/method update in standard redefinition)
     ConstantPoolCache* cp_cache = other_cp->cache();
@@ -1564,17 +1559,6 @@ void VM_EnhancedRedefineClasses::ClearCpoolCacheAndUnpatch::do_klass(Klass* k) {
     if (RewriteBytecodes) {
       ik->methods_do(unpatch_bytecode);
     }
-=======
-  // DCEVM - clear whole cache (instead special methods for class/method update in standard redefinition)
-  ConstantPoolCache* cp_cache = other_cp->cache();
-  if (cp_cache != NULL) {
-    cp_cache->clear_entries();
-  }
-
-  // If bytecode rewriting is enabled, we also need to unpatch bytecode to force resolution of zeroed entries
-  if (RewriteBytecodes) {
-    ik->methods_do(unpatch_bytecode);
->>>>>>> d0d459ba2ec (Fix line ending CRLF->LF)
   }
 }
 
@@ -1594,10 +1578,6 @@ void VM_EnhancedRedefineClasses::MethodDataCleaner::do_klass(Klass* k) {
   }
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> d0d459ba2ec (Fix line ending CRLF->LF)
 void VM_EnhancedRedefineClasses::update_jmethod_ids() {
   for (int j = 0; j < _matching_methods_length; ++j) {
     Method* old_method = _matching_old_methods[j];
